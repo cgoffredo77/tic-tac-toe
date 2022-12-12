@@ -1,6 +1,7 @@
 // This tells the Rust compiler that there is a module called "game" in a file called "game.rs"
 // Conventions like this make it really easy to write code fast. If you want to customize that
 // behaviour, Rust gives you the power to do that too.
+/// This module contains the `Game` struct and associated types and functions.
 mod game;
 
 // This is how we "import" a module from the standard library. A module is a group of functions and
@@ -8,6 +9,7 @@ mod game;
 // module to read input from the user of our application.
 // The import "self" imports the name "io" itself, and "Write" imports the "Write trait" which we
 // need to flush stdout below.
+/// The `io` module contains functions and types for working with input and output.
 use std::io::{self, Write};
 // We use the process::exit function to quit the program when we need to.
 use std::process;
@@ -23,11 +25,17 @@ use game::{Game, Piece, Winner, Tiles, MoveError};
 // goes out of scope. String is used for the same of simplicity. By marking the type stored in this
 // struct as `pub`, its value can be freely accessed even in patterns (for example, match
 // statements).
+
+/// This struct is used to represent an error when an invalid move string is provided by the user.
+/// The string is stored in the struct so that it can be accessed and displayed as part of the error
+/// message.
 #[derive(Debug, Clone)]
 pub struct InvalidMove(pub String);
 
 // The main function is where Rust starts running our program from. No code is allowed outside of
 // functions so that you can rely on the code in main() running first.
+
+/// The main entry point for the program.
 fn main() {
     // The constructor for Game creates a new, empty Tic-Tac-Toe board. `mut` signals that we plan
     // to modify the value of the game variable. Rust will tell us if we forget to use this and
@@ -39,9 +47,12 @@ fn main() {
         // First, print out the current board
         print_tiles(game.tiles());
 
-        // Inform the user of who's turn it currently is
+
+       // Inform the user of who's turn it currently is
         // match will enforce that we do not forget any case and the string that it produces will
         // replace `{}` in the printed string.
+        
+        /// Prints the current piece that is taking its turn.
         println!("Current piece: {}", match game.current_piece() {
             Piece::X => "x",
             Piece::O => "o",
@@ -49,6 +60,9 @@ fn main() {
 
         // prompt_move continuously prompts for a valid move from the user, determines exactly
         // which position on the board that move is referring to, and then returns that move
+
+        /// Prompts the user for a valid move and returns the position on the board that the move
+        /// refers to.
         let (row, col) = prompt_move();
 
         // Now that we have a move, let's attempt to make it
@@ -60,18 +74,26 @@ fn main() {
             // Match allows us to conveniently match even nested types like Result and pull out the
             // fields as variables
 
-            // Since we are using is_finished(), it should never be possible for this error to
+
+              // Since we are using is_finished(), it should never be possible for this error to
             // occur. If it does, that means that we (the programmer) did something wrong, not the
             // user. `unreachable!()` works a lot like `println!();` except it exits the program
             // with an error using the message that we provided it. Use `unreachable!()` whenever
             // you encounter a case that you think should never be reached.
+
+            /// This case is unreachable because it should not be possible for the game to already be
+            /// over when this code is executed. This indicates that there is a bug in the program.
             Err(MoveError::GameAlreadyOver) => unreachable!("Game was already over when it should not have been"),
             // Since prompt_move limits the range of what can be returned, it should never allow
             // the user to enter a move that is out of range. Thus, this case is unreachable as
             // well.
+
+            /// This case is unreachable because `prompt_move()` should never return an invalid
+            /// position. This indicates that there is a bug in the program.
             Err(MoveError::InvalidPosition {row, col}) => {
                 unreachable!("Should not be able to enter an invalid move, but still got ({}, {})", row, col)
             },
+
 
             // Notice that we have already eliminated two possible errors just by structuring our
             // code in a certain way!
@@ -80,6 +102,7 @@ fn main() {
             // print an error message.
             // The `eprintln!` macro is exactly the same as `println!` except it prints to stderr
             // instead of stdout.
+            /// This is another error this is displayed when trying to place a piece in a non-empty spot
             Err(MoveError::TileNotEmpty {other_piece, row, col}) => eprintln!(
                 // Each {} will be replaced with one of the arguments following this string
                 "The tile at position {}{} already has piece {} in it!",
@@ -106,11 +129,13 @@ fn main() {
     // Once the loop is over, the game is finished. Let's output the results
 
     // First, we'll print the board again
+    ///Prints the board
     print_tiles(game.tiles());
 
     // Then print out which piece won the game
     // We use expect() to express that there should definitely be a winner now and if the winner
     // method returns None, the program should exit with this error
+    ///Prints if X or O won the game, or a tie
     match game.winner().expect("finished game should have winner") {
         Winner::X => println!("x wins!"),
         Winner::O => println!("o wins!"),
@@ -125,14 +150,17 @@ fn main() {
 // This function returns a "tuple" of two values, the row and column of the selected move. Tuples
 // are very useful for when you have a function that needs to return two values because it saves
 // you from having to define a custom struct just for that purpose.
+///Function returns the row and column of selected move
 fn prompt_move() -> (usize, usize) {
     // We'll use `loop` to continuously prompt for input until the user provides what we want. When
     // we get the answer we want, the loop will return the value and it will be used as the return
     // value of this function
+    ///Use loop to prompt user until we get what we want from them. 
     loop {
         // Rust supports convenient `print!` and `println!` macros which support easy and
         // customizable formatting of values from your program. Here we are just using them to
         // prompt for some values that we want the user of our program to provide.
+        ///Ask user to make a move
         print!("Enter move (e.g. 1A): ");
 
         // Line-buffering is when something waits until it sees a new line character before
@@ -145,6 +173,7 @@ fn prompt_move() -> (usize, usize) {
 
         // The read_line() function is something we defined below to make reading input quick and
         // easy.
+        ///Take input using read_line
         let line = read_line();
 
         // We delegate reading the line as a move to the parse_move function. That function takes a
@@ -167,6 +196,7 @@ fn prompt_move() -> (usize, usize) {
             // pattern matching to extract its value and print a helpful error message. The
             // `eprintln!` macro is exactly the same as `println!` except it prints to stderr
             // instead of stdout.
+            ///Used to print error if needed.
             Err(InvalidMove(invalid_str)) => eprintln!(
                 // The `{}` is replaced with the next argument passed to eprintln. We can pass an
                 // arbitrary amount of arguments and Rust can even tell us at compile time if there
@@ -188,6 +218,8 @@ fn prompt_move() -> (usize, usize) {
 // features of Rust. However, notice though that we don't really lose anything or make anything
 // worse for ourselves by keeping it simple. Rust lets you write nice code even if you haven't
 // mastered all of its features just yet.
+///Function to get the move from user (row and column)
+///If not valid move, returns error
 fn parse_move(input: &str) -> Result<(usize, usize), InvalidMove> {
     // The move will be in the format 1A, 2C, 3B, etc.
     // Let's start by rejecting any input that isn't of size 2
@@ -200,13 +232,14 @@ fn parse_move(input: &str) -> Result<(usize, usize), InvalidMove> {
     // Let's start by getting the row number
     // Using match allows us to easily accept the cases we want to support and reject everything
     // else. If none of the cases match, an error will be returned.
+    ///First gets the row number
     let row = match &input[0..1] {
         "1" => 0,
         "2" => 1,
         "3" => 2,
         _ => return Err(InvalidMove(input.to_string())),
     };
-
+    
     let col = match &input[1..2] {
         // Rust lets us match against multiple patterns using | to separate them. This
         // lets us accept either lowercase or uppercase versions of the letters.
@@ -218,11 +251,13 @@ fn parse_move(input: &str) -> Result<(usize, usize), InvalidMove> {
         // variant of Result to express that.
         // We can convert a &str to a String using `to_string()`. InvalidMove expects a String,
         // so we need to do this for this code to work.
+        ///Returns error from invalid input
         invalid => return Err(InvalidMove(invalid.to_string())),
     };
 
     // The last line of the function is the return value, so we construct the tuple that we want
     // to return with the move that the user selected
+    ///Returns the value of tuple (row,col)
     Ok((row, col))
 }
 
@@ -233,12 +268,14 @@ fn parse_move(input: &str) -> Result<(usize, usize), InvalidMove> {
 // input. Since we're just reading a line at a time and we expect the lines to be short, this
 // should not cause problems in the majority of cases. Rust gives us the power to make that choice
 // explicitly and know that we are making it in the code.
+///This function makes reading a line of input easier
 fn read_line() -> String {
     // This creates a new growable/heap-allocated string. The `mut` after `let` declares that we
     // plan to modify the string. Saying this explicitly lets the compiler automatically check that
     // we don't modify any variables that we don't intend to. Many languages encourage you to use
     // `const` or `final` on pretty much everything until you don't need to. In Rust, that
     // behaviour is by default.
+    ///Creates new string
     let mut input = String::new();
     // Here, we read a line of input from the standard input stream stdin. `&mut input` passes a
     // mutable reference to the String in the input variable. This allows the function to modify
@@ -251,10 +288,12 @@ fn read_line() -> String {
     // is one of the ways that Rust gives you control. Don't want to deal with a potential failure?
     // You don't have to! But it's really nice to know where the error came from if something ever
     // does go wrong and you want to figure out why.
+    ///We read the input, expect a result, if not it fails and returns an error
     io::stdin().read_line(&mut input).expect("Failed to read input");
 
     // An empty string will only be returned if we reach the end of input (otherwise we always
     // receive at least a newline character).
+
     if input.is_empty() {
         // We print a final newline because otherwise the cursor may still be at the end of one
         // of our `print!` calls earlier.
@@ -267,6 +306,7 @@ fn read_line() -> String {
 
     // read_line leaves the trailing newline on the string, so we remove it using truncate. By
     // modifying the string in place, we avoid copying its contents after it was just allocated.
+    ///read_line leaves the trailing newline on the string, so we remove it using truncate
     let len_without_newline = input.trim_right().len();
     input.truncate(len_without_newline);
 
@@ -277,6 +317,7 @@ fn read_line() -> String {
 }
 
 // This function is used to print out the board in a human readable way
+///Function used to print the board for the user
 fn print_tiles(tiles: &Tiles) {
     // The result of this function will be something like the following:
     //   A B C
@@ -287,12 +328,14 @@ fn print_tiles(tiles: &Tiles) {
     // The boxes represent empty tiles, and x and o are placed wherever a tile is filled.
 
     // First we print the space before the column letters
+    ///Print the space before the column letters
     print!("  ");
     // Then we look from the numbers 0 to 2.
     // `a..b` creates a "range" of numbers from a to one less than b.
     // `tiles[0].len()` gets the number of columns (i.e. 2)
     // `as u8` converts the length from the type `usize` to the type `u8` so that it works in the
     // body of the loop
+    ///Loop to print the row of column letters
     for j in 0..tiles[0].len() as u8 {
         // `b'A'` produces the ASCII character code for the letter A (i.e. 65)
         // By adding j to it, we get 'A', then 'B', and then 'C'.
@@ -301,11 +344,13 @@ fn print_tiles(tiles: &Tiles) {
         print!(" {}", (b'A' + j) as char);
     }
     // This prints the final newline after the row of column letters
+
     println!();
 
     // Now we print each row preceeded by its row number
     // .iter().enumerate() goes through each row and provides a row number with each element using
     // a tuple.
+    ///Loop to print each row and row number
     for (i, row) in tiles.iter().enumerate() {
         // We print the row number with a space in front of it
         print!(" {}", i + 1);

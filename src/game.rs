@@ -4,19 +4,21 @@
 // you would either need to pass the size to every function with the board or rely on this global
 // constant. In Rust, that information is stored directly in the array so you always have the
 // correct value.
+///Creates a constant board size of 3
 const BOARD_SIZE: usize = 3;
 
 // We want to use an enum for piece because we can either have one piece or the other on a tile,
 // but never both at the same time
 // `derive` automatically derives certain useful traits. These make this custom type that we've
 // defined copyable, comparable for equality, and more without any additional work!
+///Creates an enum for your piece that you input
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Piece {
     // Access these variants using `Piece::X` or `Piece::O`
     X,
     O,
 }
-
+///Implement piece
 impl Piece {
     // This method is used to return the opposite piece and is used to quickly determine the next
     // piece after each move
@@ -51,10 +53,13 @@ pub type Tile = Option<Piece>;
 // We represent the tiles of the board using a 2D array
 // Each element of the first array is a row of the board.
 // tiles[1][2] accesses the second row and third column of the board.
+///Creates a 2D array for the titles of the board
 pub type Tiles = [[Tile; BOARD_SIZE]; BOARD_SIZE];
 
 // There are three possibilities for the winner at the end of the game. We represent them as an
 // enum because only one of them can ever occur at a given time.
+///Represent the 3 outcomes of the game as an enum:
+///Either X wins, O wins, or it's a tie
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Winner {
     X,
@@ -63,6 +68,7 @@ pub enum Winner {
 }
 
 // This type represents the possible errors that can occur when making a move
+///Represents erros when making a move
 #[derive(Debug, Clone)]
 pub enum MoveError {
     // Putting /// instead of // means that Rust's documentation tool will automatically pickup
@@ -96,11 +102,12 @@ pub struct Game {
     winner: Option<Winner>,
 }
 
+///Implements game
 impl Game {
     // Using Self inside of an impl allows us to refer to its type (i.e. `Game`) without using the
     // type name explicitly. This is useful for renaming!
     pub fn new() -> Self {
-        // Here we construct and return a new instance of Game
+        ///Here we construct and return a new instance of Game
         Self {
             // Here, we take advantage of the Default trait to make it so that this code doesn't
             // have to know the type we defined for tiles in order to initialize it. Rust has
@@ -123,6 +130,7 @@ impl Game {
     // Both row and col must be values from 0 to (BOARD_SIZE-1)
     // In the return type, () indicates the "unit type". That means that on success, this function
     // returns nothing.
+    ///This is the function created in order to make a move
     pub fn make_move(&mut self, row: usize, col: usize) -> Result<(), MoveError> {
         if self.is_finished() {
             // Here, we use `return` to indicate that we want to leave this function early if this
@@ -169,6 +177,7 @@ impl Game {
     }
 
     // We use a private method to separate code that shouldn't be accessed publically
+    ///Creates a function that checks the last move and see if there is a winner
     fn update_winner(&mut self, row: usize, col: usize) {
         // To find a potential winner, we only need to check the row, column and (maybe) diagonal
         // that the last move was made in.
@@ -296,6 +305,7 @@ impl Game {
     // type. This makes it so that people using this type won't have to rely on how the type is
     // represented.
     // `&self` tells the Rust compiler that we won't be modifying this type
+    ///Function that checks if the game is finished
     pub fn is_finished(&self) -> bool {
         // The last line of a function is its return value, so we don't need to write return for
         // simple one line functions.
@@ -310,12 +320,14 @@ impl Game {
     // can return it directly from this function without moving its value. Rust will copy the value
     // (including the Option type that wraps it). For small types, this can make writing the code
     // much easier without introducing any additional performance penalty.
+    ///Function that returns the winner of the game if there is one
     pub fn winner(&self) -> Option<Winner> {
         self.winner
     }
 
     // This method is similar to the winner method above. It returns a copy of the current piece.
     // Just like Winner, Piece also implements the Copy trait.
+    ///Function that returns a copy of current piece
     pub fn current_piece(&self) -> Piece {
         self.current_piece
     }
@@ -337,6 +349,7 @@ impl Game {
 // #[cfg(test)] tells the compiler to only include the rest of this code if we are running
 // `cargo test`. This speeds up compile times since Rust doesn't need to process a bunch of code
 // which won't be run otherwise.
+///Test cases that cover anything that may go wrong
 #[cfg(test)]
 mod tests {
     // This imports everything above so we get access to our Game, Winner, Piece, etc. types
