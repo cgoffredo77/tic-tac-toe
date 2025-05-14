@@ -170,39 +170,5 @@ fn print_tiles(tiles: &Tiles) {
 
 
 
-mod game;
-
-use std::io::{self, Write};
-
-use std::process;
-
-/// The `game` module provides the `Game` struct and associated types and methods for
-/// representing a game of tic-tac-toe.
-use game::{Game, Piece, Winner, Tiles, MoveError};
-
-#[derive(Debug, Clone)]
-/// The `InvalidMove` struct represents an error that occurs when a move is invalid.
-pub struct InvalidMove(pub String);
-
-fn main() {
-    /// Create a new `Game` instance.
-    let mut game = Game::new();
-
-    /// Loop until the game is finished.
-    while !game.is_finished() {
-        /// Print the current state of the game board.
-        print_tiles(game.tiles());
-
-        /// Print the current piece.
-        println!("Current piece: {}", match game.current_piece() {
-            Piece::X => "x",
-            Piece::O => "o",
-        });
-
-        /// Prompt the user for their next move.
-        let (row, col) = prompt_move();
-
-        /// Attempt to make the move.
-        match game.make_move(row, col) {
 
 
